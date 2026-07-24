@@ -1,0 +1,203 @@
+Tolaram TSP Assessment – Project Approach
+
+1. Project Overview
+
+The objective of this project is to solve a route optimization problem for Tolaram Group. The dataset contains around 3,800 retail shop locations in Lagos and a list of 41 sales agents.
+The goal was to assign every shop to one of the 41 agents while keeping the workload balanced. After assigning the shops, the visiting order for each agent was optimized to reduce the overall travel distance. Since the data contains GPS coordinates, all distance calculations were based on the Earth's curvature using the Haversine formula instead of straight-line distance.
+
+---
+
+2. Project Workflow
+
+A. Data Cleaning and Preprocessing
+
+ # What I did
+
+I started by loading the Excel file and checking the data quality.
+
+The following checks were performed:
+
+* Loaded the dataset from Excel.
+* Checked for missing values.
+* Removed duplicate shop locations.
+* Verified that latitude and longitude values were valid.
+* Prepared a clean dataset for further processing.
+
+# Problem I faced
+
+While plotting the locations, I noticed that most of the map was empty and all the valid points appeared in a very small corner.
+After checking the data, I found that a few rows contained incorrect coordinates such as very small latitude and longitude values that were clearly outside Lagos. These invalid points affected the map scale.
+
+# How I solved it
+
+Since all stores are located in Lagos, I filtered the dataset using a geographic boundary.
+
+* Latitude: 6.0 to 7.2
+* Longitude: 2.8 to 4.0
+
+This removed the incorrect records and kept only the valid shop locations. After filtering, around 3,815 valid outlets remained.
+
+---
+
+B. Distance Calculation (distance.py)
+
+# What I did
+
+To calculate the distance between locations, I implemented the Haversine formula.
+
+The Haversine formula calculates the shortest distance between two GPS coordinates on the Earth's surface, making it more accurate than Euclidean distance for latitude and longitude data.
+# Problem I faced
+
+My first implementation used nested loops to calculate the distance between every pair of locations.
+Since the dataset contains around 3,800 locations, this resulted in millions of calculations, making the program extremely slow.
+
+# How I solved it
+
+Instead of calculating distances one by one, I used NumPy vectorization with broadcasting.
+This allowed multiple distance calculations to happen at once without explicit Python loops, reducing the execution time from several minutes to less than a second.
+
+---
+
+C. Customer Assignment (clustering.py)
+
+# What I did
+
+The next step was assigning shops to the 41 sales agents.
+I used K-Means clustering with 41 clusters so that nearby shops were grouped together.
+Each cluster was assigned to one sales agent.
+
+# Problem I faced
+
+Random assignment produced poor results.
+Some agents received shops that were spread across different parts of Lagos, resulting in unnecessary travel and overlapping territories.
+
+# How I solved it
+
+Using K-Means created geographically compact clusters.
+Each agent received a nearby group of stores instead of locations scattered across the city. This produced more balanced territories and reduced travel distance.
+On average, each agent received around 93 stores.
+
+---
+
+D. Route Optimization (optimizer.py)
+
+# What I did
+
+After assigning shops to agents, I optimized the visiting order within each cluster.
+The optimization was completed in two stages:
+
+* Nearest Neighbor algorithm to generate an initial route.
+* 2-Opt algorithm to improve the route.
+
+# Problem I faced
+
+The initial Nearest Neighbor solution often created routes that crossed over themselves.
+
+These unnecessary crossings increased the travel distance.
+
+# How I solved it
+
+I applied the 2-Opt optimization algorithm.
+The algorithm repeatedly checks pairs of route segments and swaps them whenever the total distance becomes shorter.
+This process continues until no further improvement is possible, resulting in cleaner and shorter routes.
+
+---
+
+# E. Route Visualization (visualize.py)
+
+# What I did
+
+I created a visualization showing all agent routes on a map.
+Each agent's route is displayed using a different color, and the paths follow Earth-curved Great Circle lines instead of straight lines.
+
+# Problem I faced
+
+Initially, I displayed the full agent names directly on the map.
+Since there were 41 agents, the labels overlapped and made the map difficult to read.
+Large figure sizes also caused legends to be cut off in Jupyter Notebook.
+
+# How I solved it
+
+Instead of displaying full names on the map, I used numbered markers for each cluster.
+I also organized the legend into multiple columns and adjusted the figure size so the complete map displays properly both in the notebook and in the exported image.
+
+---
+
+# F. Complete Pipeline (main.py)
+
+# What I did
+
+Finally, I connected all modules into a single pipeline.
+Running the main script performs the following steps automatically:
+
+* Load the dataset.
+* Clean the data.
+* Calculate distances.
+* Create customer clusters.
+* Assign agents.
+* Optimize routes.
+* Generate reports.
+* Export Excel and CSV files.
+* Create the final route visualization.
+
+# Problem I faced
+
+During integration, Python raised an ImportError because some function names had been updated while the import statements still referred to the old names.
+
+# How I solved it
+
+I updated the module exports and added compatible function names so that all modules work together correctly.
+
+After these changes, the complete pipeline executed successfully from a single command.
+
+---
+
+3. Output Files
+
+The project generates the following files:
+
+# assigned_routes.xlsx
+
+Contains the original shop information along with:
+
+* Assigned Agent
+* Cluster ID
+* Route Order
+
+This is the final assignment output.
+
+---
+
+# route_summary_metrics.csv
+
+Contains a summary for each sales agent, including:
+
+* Agent Name
+* Number of Stops
+* Total Distance
+* Average Distance per Stop
+
+This file provides an overview of workload and travel distance for all agents.
+
+---
+
+ routes_map.png
+
+A high-resolution map showing:
+
+* All customer locations
+* Optimized routes
+* Different colors for each agent
+* Earth-curved paths based on GPS coordinates
+
+---
+
+# solution_notebook.ipynb
+
+A complete Jupyter Notebook demonstrating the entire workflow from loading the dataset to generating the final outputs.
+
+---
+
+# Conclusion
+
+This project combines data cleaning, geographic clustering, route optimization, and visualization to produce an efficient assignment of retail locations to 41 sales agents. The final solution minimizes travel distance, balances the workload among agents, and generates clear reports and visualizations that can be reproduced by running the project pipeline.
