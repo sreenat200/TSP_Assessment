@@ -208,6 +208,6 @@ Some possible improvements are:
 
 ## Repository
 
-GitHub: https://github.com/sreenat200/TSP_Assessment
+GitHub: [https://github.com/sreenat200/TSP_Assessment](https://github.com/sreenat200/TSP_Assessment)
 
 This project was built as part of a route optimization assignment using clustering and Traveling Salesman Problem (TSP) techniques.
